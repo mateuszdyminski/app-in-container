@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+spec:
+  selector:
+    matchLabels:
+      app: app
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: app
+    spec:
+      containers:
+      - name: app
+        image: mateuszdyminski/app-container-reload:latest
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /config
+          name: config-volume
+        ports:
+        - containerPort: 8080
+      - name: reloader
+        image: jimmidyson/configmap-reload:v0.3.0
+        args:
+            - --volume-dir=/config
+            - --webhook-url=http://127.0.0.1:8080/-/reload
+        volumeMounts:
+        - name: config-volume
+          mountPath: /config
+      volumes:
+        - name: config-volume
+          configMap:
+            name: app-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-svc
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      nodePort: 32090
+      protocol: TCP
+  selector:
+    app: app
