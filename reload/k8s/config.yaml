@@ -3,5 +3,11 @@ kind: ConfigMap
 metadata:
   name: app-config
 data:
-  message: Hello World!
+  # Config could be pair: key-value
+  message: Hello Wroclaw!
   foo: bar
+  
+  # Or set as complete file contents
+  keys: |
+    message=Hello World 
+    foo=bar
